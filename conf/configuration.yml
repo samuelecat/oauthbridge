@@ -1,0 +1,14 @@
+version: 1.0
+headers_prefix: "oauthbridge-"
+providers:
+  # Bitbucket
+  bitbucket:
+    base_uri: "https://x-token-auth:{access_token}@bitbucket.org"
+    #query_params:
+    client_id:
+    client_secret:
+    scopes:
+      - "repository"
+    # fine tune settings for advance usage, leave them commented out to use their default
+    #token_url: "https://bitbucket.org/site/oauth2/access_token"
+    #expire_time: 3600
