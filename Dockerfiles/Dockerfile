@@ -10,11 +10,11 @@ RUN go get golang.org/x/oauth2
 RUN go get github.com/gorilla/mux
 RUN go get gopkg.in/yaml.v2
 
-#RUN go get ${REPO}
+RUN go get ${REPO}
 # uncomment the following if you are working locally
-WORKDIR /go/src/${REPO}
-COPY . .
-RUN go install
+#WORKDIR /go/src/${REPO}
+#COPY . .
+#RUN go install
 
 FROM alpine:3.9
 RUN apk add --update --no-cache \

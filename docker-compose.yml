@@ -2,6 +2,7 @@ version: '3.3'
 services:
   oauthbridge:
     image: samuelecat/oauthbridge:latest
+    container_name: oauthbridge
     build:
       context: .
       dockerfile: ./Dockerfiles/Dockerfile
