@@ -13,5 +13,5 @@ See the LICENSE file for details.
 2. Edit the file ./conf/configuration.yml and add your client_id and client_secret 
 3. docker-compose up
 
-from now on you can access to your Bitbucket repository replacing the base URL from "https://bitbucket.org/" to "http://localhost:8081/"
+from now on you can access to your Bitbucket repository replacing the base URL from "https://bitbucket.org/" to "http://localhost:8081/bitbucket/"
 the reverse proxy will authenticate.
