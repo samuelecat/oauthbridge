@@ -28,6 +28,16 @@ var Providers map[string]*Provider
 
 type ProviderInfo map[string]string
 
+func IsValidProvider(name string) bool {
+	//GoLang way to check if something is in an array of string
+	switch name {
+	case
+		"bitbucket":
+		return true
+	}
+	return false
+}
+
 func loadProviders() {
 	Providers = make(map[string]*Provider)
 

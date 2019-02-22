@@ -24,6 +24,14 @@ func loadOAuthClients() {
 	}
 }
 
+func getToken(c *clientcredentials.Config) (string, error) {
+	token, err := c.Token(oauth2.NoContext)
+	if err != nil {
+		return "", err
+	}
+	return token.AccessToken, nil
+}
+
 func getBitbucketToken() (string, error) {
 	// https://developer.atlassian.com/cloud/bitbucket/oauth-2/
 
@@ -33,11 +41,10 @@ func getBitbucketToken() (string, error) {
 	if Providers["bitbucket"].Token == "" ||
 		(current_t-Providers["bitbucket"].LastRefresh) > Providers["bitbucket"].ExpireTime {
 
-		var token *oauth2.Token = nil
-		c := OAuthClientsConf["bitbucket"]
-		token, err = c.Token(oauth2.NoContext)
+		var token string
+		token, err = getToken(OAuthClientsConf["bitbucket"])
 		if err == nil {
-			Providers["bitbucket"].Token = token.AccessToken
+			Providers["bitbucket"].Token = token
 			Providers["bitbucket"].LastRefresh = current_t
 		}
 	}

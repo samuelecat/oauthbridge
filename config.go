@@ -56,7 +56,8 @@ func loadConfig() {
 
 	// check mandatory fields
 	for name, provider := range Config.Providers {
-		if provider.BaseURI == "" ||
+		if !IsValidProvider(name) ||
+			provider.BaseURI == "" ||
 			provider.ClientId == "" ||
 			provider.ClientSecret == "" ||
 			len(provider.Scopes) == 0 {
