@@ -3,7 +3,6 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -14,6 +13,7 @@ type configuration struct {
 	HeadersPrefix string `yaml:"headers_prefix"`
 	Providers     map[string]struct {
 		BaseURI      string   `yaml:"base_uri"`
+		QueryParams  []string `yaml:"query_params"`
 		ClientId     string   `yaml:"client_id"`
 		ClientSecret string   `yaml:"client_secret"`
 		Scopes       []string `yaml:"scopes"`
@@ -36,17 +36,26 @@ func (c *configuration) getConf(file_path string) *configuration {
 	return c
 }
 
-func loadConfig() {
-	var file_path string
-	if _, err := os.Stat("./conf/configuration.yml"); err == nil {
-		// local path
-		file_path = "./conf/configuration.yml"
-	} else if _, err := os.Stat("/etc/oauthbridge/configuration.yml"); err == nil {
-		file_path = "/etc/oauthbridge/configuration.yml"
+func loadConfig(file_path string) {
+	if file_path != "" {
+		if _, err := os.Stat(file_path); err != nil {
+			log.Error("provided file path to configuration.yml not found")
+			file_path = ""
+		}
+	}
+	if file_path == "" {
+		if _, err := os.Stat("./conf/configuration.yml"); err == nil {
+			// local path
+			file_path = "./conf/configuration.yml"
+		} else if _, err := os.Stat("/etc/oauthbridge/configuration.yml"); err == nil {
+			file_path = "/etc/oauthbridge/configuration.yml"
+		}
 	}
 
 	if file_path == "" {
 		log.Fatalln("error configuration file configuration.yml not found")
+	} else {
+		log.Info("found configuration file: " + file_path)
 	}
 
 	Config.getConf(file_path)

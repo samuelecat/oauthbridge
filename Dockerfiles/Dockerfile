@@ -9,6 +9,7 @@ RUN apk add git bash
 RUN go get golang.org/x/oauth2
 RUN go get github.com/gorilla/mux
 RUN go get gopkg.in/yaml.v2
+RUN go get github.com/sirupsen/logrus
 
 RUN go get ${REPO}
 # uncomment the following if you are working locally
