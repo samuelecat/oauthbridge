@@ -1,4 +1,4 @@
-# OAuthbridge
+# OAuthbridge [![Build Status](https://travis-ci.com/samuelecat/oauthbridge.svg?branch=master)](https://travis-ci.com/samuelecat/oauthbridge)&nbsp;[![codecov](https://codecov.io/gh/samuelecat/oauthbridge/branch/master/graph/badge.svg)](https://codecov.io/gh/samuelecat/oauthbridge)
 A reverse proxy that provides transparent authentication to resources protected by OAuth
 
 
