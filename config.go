@@ -23,6 +23,11 @@ type configuration struct {
 }
 
 var Config configuration
+var LoadConfig func(string)
+
+func init() {
+	LoadConfig = loadConfig
+}
 
 func (c *configuration) getConf(file_path string) *configuration {
 	yamlFile, err := ioutil.ReadFile(file_path)
@@ -39,10 +44,11 @@ func (c *configuration) getConf(file_path string) *configuration {
 func loadConfig(file_path string) {
 	if file_path != "" {
 		if _, err := os.Stat(file_path); err != nil {
-			log.Error("provided file path to configuration.yml not found")
+			log.Error("the provided file path to configuration file was not found")
 			file_path = ""
 		}
 	}
+	// look for configuration file in default places
 	if file_path == "" {
 		if _, err := os.Stat("./conf/configuration.yml"); err == nil {
 			// local path
@@ -58,6 +64,7 @@ func loadConfig(file_path string) {
 		log.Info("found configuration file: " + file_path)
 	}
 
+	// read conf
 	Config.getConf(file_path)
 	if len(Config.Providers) == 0 {
 		log.Fatalln("error parsing configuration file")

@@ -11,12 +11,14 @@ import (
 var (
 	OAuthClientsConf  map[string]*clientcredentials.Config
 	GetToken          func(*clientcredentials.Config) (string, error)
+	LoadOAuthClients  func()
 	GetBitbucketToken func() (string, error)
 )
 
 func init() {
 	GetToken = getToken
 	GetBitbucketToken = getBitbucketToken
+	LoadOAuthClients = loadOAuthClients
 }
 
 func getToken(c *clientcredentials.Config) (string, error) {

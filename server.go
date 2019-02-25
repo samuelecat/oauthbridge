@@ -10,8 +10,11 @@ import (
 )
 
 var log = logrus.New()
+var ServerStart func()
 
 func init() {
+	ServerStart = serverStart
+
 	// Output to stdout
 	log.Out = os.Stdout
 
@@ -23,16 +26,23 @@ func init() {
 
 func main() {
 	log.Info("loading configuration...")
-	loadConfig("")
-	loadProviders()
-	loadOAuthClients()
+	LoadConfig("")
+	LoadProviders()
+	LoadOAuthClients()
 
 	log.Info("starting the server...")
+	ServerStart()
+}
+
+func serverStart() {
 	r := mux.NewRouter()
-	r.HandleFunc("/{provider}-{method}/{path:.*}", providerHandler)
+	r.HandleFunc("/{provider}-{method}/{path:.*}", ProviderHandler)
 	http.Handle("/", &MyServer{r})
 	log.Info("ready")
-	http.ListenAndServe(":9999", nil)
+	err := http.ListenAndServe(":9999", nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
 type MyServer struct {
