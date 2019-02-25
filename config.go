@@ -3,7 +3,6 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -14,6 +13,7 @@ type configuration struct {
 	HeadersPrefix string `yaml:"headers_prefix"`
 	Providers     map[string]struct {
 		BaseURI      string   `yaml:"base_uri"`
+		QueryParams  []string `yaml:"query_params"`
 		ClientId     string   `yaml:"client_id"`
 		ClientSecret string   `yaml:"client_secret"`
 		Scopes       []string `yaml:"scopes"`
@@ -23,6 +23,11 @@ type configuration struct {
 }
 
 var Config configuration
+var LoadConfig func(string)
+
+func init() {
+	LoadConfig = loadConfig
+}
 
 func (c *configuration) getConf(file_path string) *configuration {
 	yamlFile, err := ioutil.ReadFile(file_path)
@@ -36,19 +41,30 @@ func (c *configuration) getConf(file_path string) *configuration {
 	return c
 }
 
-func loadConfig() {
-	var file_path string
-	if _, err := os.Stat("./conf/configuration.yml"); err == nil {
-		// local path
-		file_path = "./conf/configuration.yml"
-	} else if _, err := os.Stat("/etc/oauthbridge/configuration.yml"); err == nil {
-		file_path = "/etc/oauthbridge/configuration.yml"
+func loadConfig(file_path string) {
+	if file_path != "" {
+		if _, err := os.Stat(file_path); err != nil {
+			log.Error("the provided file path to configuration file was not found")
+			file_path = ""
+		}
+	}
+	// look for configuration file in default places
+	if file_path == "" {
+		if _, err := os.Stat("./conf/configuration.yml"); err == nil {
+			// local path
+			file_path = "./conf/configuration.yml"
+		} else if _, err := os.Stat("/etc/oauthbridge/configuration.yml"); err == nil {
+			file_path = "/etc/oauthbridge/configuration.yml"
+		}
 	}
 
 	if file_path == "" {
 		log.Fatalln("error configuration file configuration.yml not found")
+	} else {
+		log.Info("found configuration file: " + file_path)
 	}
 
+	// read conf
 	Config.getConf(file_path)
 	if len(Config.Providers) == 0 {
 		log.Fatalln("error parsing configuration file")
@@ -56,7 +72,8 @@ func loadConfig() {
 
 	// check mandatory fields
 	for name, provider := range Config.Providers {
-		if provider.BaseURI == "" ||
+		if !IsValidProvider(name) ||
+			provider.BaseURI == "" ||
 			provider.ClientId == "" ||
 			provider.ClientSecret == "" ||
 			len(provider.Scopes) == 0 {

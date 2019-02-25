@@ -4,7 +4,6 @@ package main
 import (
 	"encoding/base64"
 	"errors"
-	"log"
 	"net/url"
 	"strings"
 
@@ -27,6 +26,28 @@ type Provider struct {
 var Providers map[string]*Provider
 
 type ProviderInfo map[string]string
+
+var (
+	IsValidProvider func(string) bool
+	LoadProviders   func()
+	GetProviderInfo func(string, string, string) (ProviderInfo, error)
+)
+
+func init() {
+	IsValidProvider = isValidProvider
+	LoadProviders = loadProviders
+	GetProviderInfo = getProviderInfo
+}
+
+func isValidProvider(name string) bool {
+	//GoLang way to check if something is in an array of string
+	switch name {
+	case
+		"bitbucket":
+		return true
+	}
+	return false
+}
 
 func loadProviders() {
 	Providers = make(map[string]*Provider)
@@ -72,9 +93,9 @@ func getProviderInfo(provider string, url_path string, url_query string) (Provid
 
 	switch provider {
 	case "bitbucket":
-		//log.Println("serving provider ", provider)
+		log.Debug("serving provider ", provider)
 		bb := Providers[provider]
-		token, err = getBitbucketToken()
+		token, err = GetBitbucketToken()
 		if err == nil {
 			var u *url.URL
 			base_url := strings.Replace(bb.BaseURI, "{access_token}", token, -1)

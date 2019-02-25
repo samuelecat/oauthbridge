@@ -2,27 +2,47 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
-	"log"
 	"net/http"
-	"strings"
+	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
-func main() {
-	log.Println("loading configuration...")
-	loadConfig()
-	loadProviders()
-	loadOAuthClients()
+var log = logrus.New()
+var ServerStart func()
 
-	log.Println("starting the server...")
+func init() {
+	ServerStart = serverStart
+
+	// Output to stdout
+	log.Out = os.Stdout
+
+	// Log level
+	//log.Level = logrus.ErrorLevel
+	log.Level = logrus.InfoLevel
+	//log.Level = logrus.DebugLevel
+}
+
+func main() {
+	log.Info("loading configuration...")
+	LoadConfig("")
+	LoadProviders()
+	LoadOAuthClients()
+
+	log.Info("starting the server...")
+	ServerStart()
+}
+
+func serverStart() {
 	r := mux.NewRouter()
-	r.HandleFunc("/{provider}-{method}/{path:.*}", providerHandler)
+	r.HandleFunc("/{provider}-{method}/{path:.*}", ProviderHandler)
 	http.Handle("/", &MyServer{r})
-	log.Println("ready")
-	http.ListenAndServe(":9999", nil)
+	log.Info("ready")
+	err := http.ListenAndServe(":9999", nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
 type MyServer struct {
@@ -35,38 +55,4 @@ func (s *MyServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	s.r.ServeHTTP(rw, req)
-}
-
-func providerHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	provider := vars["provider"]
-	method := vars["method"]
-
-	// remove the "/provider-method/" part from the path
-	path := "/" + strings.TrimPrefix(r.URL.Path, "/"+provider+"-"+method+"/")
-	data, err := getProviderInfo(provider, path, r.URL.RawQuery)
-
-	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		log.Println("error: ", err)
-	} else {
-		switch method {
-		case "redirect":
-			http.Redirect(w, r, data["url_full"], http.StatusTemporaryRedirect)
-			log.Printf("redirect to: %s", data["redirect_to"])
-		case "info":
-			// headers
-			w.Header().Set("Content-Type", "application/json")
-			for key, value := range data {
-				w.Header().Set(Config.HeadersPrefix+key, value)
-			}
-			w.WriteHeader(http.StatusUnauthorized)
-			// body
-			str, _ := json.Marshal(data)
-			w.Write([]byte(str))
-		default:
-			http.Error(w, "Bad Request", http.StatusBadRequest)
-			log.Println("error: ", errors.New("unknow method provided"))
-		}
-	}
 }

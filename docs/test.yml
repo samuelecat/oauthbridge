@@ -1,0 +1,16 @@
+# this configuration it is good only for testing
+version: 1.0
+headers_prefix: "oauthbridge-"
+providers:
+  # Examplebucket
+  examplebucket:
+    base_uri: "https://example.com"
+    query_params:
+      - "param_example1=param_value1"
+      - "param_example2=param_value2"
+    client_id: "example-client-id"
+    client_secret: "example-client-secret"
+    scopes:
+      - "repository"
+    token_url: "https://example.com/oauth2/access_token"
+    expire_time: 200
