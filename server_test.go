@@ -19,6 +19,13 @@ func TestMain(t *testing.T) {
 	origLoadProviders := LoadProviders
 	origLoadOAuthClients := LoadOAuthClients
 	origServerStart := ServerStart
+	defer func() {
+		// restore
+		LoadConfig = origLoadConfig
+		LoadProviders = origLoadProviders
+		LoadOAuthClients = origLoadOAuthClients
+		ServerStart = origServerStart
+	}()
 
 	LoadConfig = func(string) {
 		loadC = true
@@ -39,10 +46,4 @@ func TestMain(t *testing.T) {
 	assert.True(loadP, "LoadProviders() was not execute in main()")
 	assert.True(loadA, "LoadOAuthClients() was not execute in main()")
 	assert.True(loadA, "ServerStart() was not execute in main()")
-
-	// reset
-	LoadConfig = origLoadConfig
-	LoadProviders = origLoadProviders
-	LoadOAuthClients = origLoadOAuthClients
-	ServerStart = origServerStart
 }

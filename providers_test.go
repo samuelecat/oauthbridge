@@ -52,27 +52,43 @@ func TestLoadProviders(t *testing.T) {
 
 	// mocking a pseudo valid structure
 	p := MockProviders()
-
 	Config = configuration{Providers: p}
 
 	loadProviders()
 	_, ok := Providers["bitbucket"]
 	assert.True(ok, "a valid provider was not loaded")
 
+	// mocking valid structure relying on default values
 	p = MockProviders()
 	bb := p["bitbucket"]
+	bb.TokenURL = ""
+	bb.ExpireTime = 0
+	Config = configuration{Providers: p}
+
+	loadProviders()
+	data, ok := Providers["bitbucket"]
+	assert.True(ok, "a valid provider was not loaded")
+	assert.NotNil(data.TokenURL, "TokenURL was not set from default value")
+	assert.NotEqual(data.ExpireTime, 0, "ExpireTime was not set from default value")
+
+	p = MockProviders()
+	bb = p["bitbucket"]
 
 	bb.BaseURI = "not-valid-for-bitbucket"
 	p["bitbucket"] = bb
 
 	Config = configuration{Providers: p}
+
 	log.ExitFunc = func(int) {}
+	defer func() {
+		// restore
+		log.ExitFunc = os.Exit
+	}()
 
 	loadProviders()
 
 	assert.Equal(logrus.FatalLevel, hook.LastEntry().Level)
 
-	log.ExitFunc = os.Exit
 	hook.Reset()
 }
 
@@ -80,8 +96,18 @@ func TestGetProviderInfo(t *testing.T) {
 	assert := assert.New(t)
 	log, _ = test.NewNullLogger()
 
+	// mocking a pseudo valid structure
+	p := MockProviders()
+	Config = configuration{Providers: p}
+	loadProviders()
+
 	// disable the real GetToken()
 	origGetToken := GetToken
+	defer func() {
+		// restore
+		GetToken = origGetToken
+	}()
+
 	GetToken = func(c *clientcredentials.Config) (string, error) {
 		return "test-token", nil
 	}
@@ -90,7 +116,7 @@ func TestGetProviderInfo(t *testing.T) {
 
 	assert.NotNil(err, "GetProviderInfo working using an invalid Provider")
 
-	data, err := getProviderInfo("bitbucket", "", "")
+	data, err := getProviderInfo("bitbucket", "/test", "")
 
 	assert.NotNil(data)
 
@@ -98,6 +124,6 @@ func TestGetProviderInfo(t *testing.T) {
 	assert.True(ok, "a valid provider was not loaded")
 	assert.Equal("test-token", token, "getProviderInfo() did not return our valid test-token")
 
-	// restore GetToken()
-	GetToken = origGetToken
+	_, ok = data["url_no_auth"]
+	assert.True(ok, "provider is bitbucket but url_no_auth not found")
 }

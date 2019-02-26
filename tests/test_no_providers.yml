@@ -1,0 +1,4 @@
+# this configuration it is good only for testing
+version: 1.0
+headers_prefix: "oauthbridge-"
+providers:

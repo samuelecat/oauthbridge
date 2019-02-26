@@ -32,8 +32,14 @@ func TestLoadOAuthClients(t *testing.T) {
 
 func TestGetBitbucketTokenNew(t *testing.T) {
 	assert := assert.New(t)
-	// disable the real GetToken()
+
 	origGetToken := GetToken
+	defer func() {
+		// restore
+		GetToken = origGetToken
+	}()
+
+	// disable the real GetToken()
 	GetToken = func(c *clientcredentials.Config) (string, error) {
 		return "test-token", nil
 	}
@@ -56,9 +62,6 @@ func TestGetBitbucketTokenNew(t *testing.T) {
 	token, _ := getBitbucketToken()
 
 	assert.Equal(token, "test-token", "bitbucket new test-token not retrieved")
-
-	// restore GetToken()
-	GetToken = origGetToken
 }
 
 func TestGetBitbucketTokenCache(t *testing.T) {
