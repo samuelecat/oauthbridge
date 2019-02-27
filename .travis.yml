@@ -1,5 +1,10 @@
 language: go
 
+branches:
+  only:
+    - master
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+
 go:
   - 1.11
   - tip

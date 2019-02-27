@@ -70,3 +70,28 @@ func TestLoadConfig(t *testing.T) {
 
 	assert.Equal(logrus.FatalLevel, hook.LastEntry().Level, "parsing invalid provider for test configuration file did not throw a fatal")
 }
+
+func TestLoadConfigFileNotFound(t *testing.T) {
+	assert := assert.New(t)
+	var hook *test.Hook
+	log, hook = test.NewNullLogger()
+
+	log.ExitFunc = func(int) {}
+	origOsStat := osStat
+	defer func() {
+		// restore
+		log.ExitFunc = os.Exit
+		osStat = origOsStat
+	}()
+
+	// mock, osStat() will return error
+	osStat = func(string) (os.FileInfo, error) {
+		return os.Stat("-file-not-found-")
+	}
+
+	Config = configuration{}
+	loadConfig("irrelevant-file-path")
+
+	assert.NotNil(hook.LastEntry())
+	assert.Equal(logrus.FatalLevel, hook.LastEntry().Level, "parsing not found configuration file did not throw a fatal")
+}

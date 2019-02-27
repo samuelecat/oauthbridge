@@ -23,10 +23,15 @@ type configuration struct {
 }
 
 var Config configuration
-var LoadConfig func(string)
+
+var (
+	LoadConfig func(string)
+	osStat     func(string) (os.FileInfo, error)
+)
 
 func init() {
 	LoadConfig = loadConfig
+	osStat = os.Stat
 }
 
 func (c *configuration) getConf(file_path string) *configuration {
@@ -43,17 +48,17 @@ func (c *configuration) getConf(file_path string) *configuration {
 
 func loadConfig(file_path string) {
 	if file_path != "" {
-		if _, err := os.Stat(file_path); err != nil {
+		if _, err := osStat(file_path); err != nil {
 			log.Error("the provided file path to configuration file was not found")
 			file_path = ""
 		}
 	}
 	// look for configuration file in default places
 	if file_path == "" {
-		if _, err := os.Stat("./conf/configuration.yml"); err == nil {
+		if _, err := osStat("./conf/configuration.yml"); err == nil {
 			// local path
 			file_path = "./conf/configuration.yml"
-		} else if _, err := os.Stat("/etc/oauthbridge/configuration.yml"); err == nil {
+		} else if _, err := osStat("/etc/oauthbridge/configuration.yml"); err == nil {
 			file_path = "/etc/oauthbridge/configuration.yml"
 		}
 	}
