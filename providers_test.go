@@ -63,12 +63,12 @@ func TestLoadProviders(t *testing.T) {
 	bb := p["bitbucket"]
 	bb.TokenURL = ""
 	bb.ExpireTime = 0
+	p["bitbucket"] = bb
 	Config = configuration{Providers: p}
-
 	loadProviders()
 	data, ok := Providers["bitbucket"]
 	assert.True(ok, "a valid provider was not loaded")
-	assert.NotNil(data.TokenURL, "TokenURL was not set from default value")
+	assert.NotEqual(data.TokenURL, "", "TokenURL was not set from default value")
 	assert.NotEqual(data.ExpireTime, 0, "ExpireTime was not set from default value")
 
 	p = MockProviders()
