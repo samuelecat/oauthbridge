@@ -12,7 +12,7 @@ See the [LICENSE](LICENCE) file for details.
 
 1. From your Bitbucket account: find the OAuth settings, then generate a new *client id* and *client secret* and set its scope on *repository*.
 2. Edit the file `./conf/configuration.yml` and under `providers` -> `bitbucket` set your `client_id`, `client_secret` and under `scopes` set `repository`
-3. having installed docker and docker-compoe, from the root run `docker-compose up`
+3. having installed docker and docker-compose, run from the root directory `docker-compose up -d`
 
 At this point you should be able to access your Bitbucket repository replacing the base URL of your repository from 
 `https://bitbucket.org/` to the one of the proxy `http://localhost:8081/bitbucket/`
